@@ -349,7 +349,7 @@ def global_gather(x,
             },
             outputs={'Out': [out]},
             attrs={
-                'ring_id': group,
+                'ring_id': ring_id,
                 'use_calc_stream': use_calc_stream,
             })
         return out

@@ -42,8 +42,7 @@ class GlobalGatherOp : public framework::OperatorWithKernel {
                           "The input tensor's dimension must be 2. "
                           "But received input's dimension = %d.",
                           ndim_input));
-    framework::DDim out_dims = framework::make_ddim({-1, -1});
-    ctx->SetOutputDim("Out", out_dims);
+    ctx->SetOutputDim("Out", input_dims);
   }
 
  protected:
