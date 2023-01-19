@@ -34,6 +34,7 @@ limitations under the License. */
 #include "paddle/phi/common/data_type.h"
 #include "paddle/phi/core/compat/convert_utils.h"
 #include "paddle/phi/core/dense_tensor.h"
+#include "paddle/phi/core/distributed_tensor.h"
 
 namespace paddle {
 namespace pybind {
@@ -501,10 +502,10 @@ platform::Place CastPyArg2Place(PyObject* obj, ssize_t arg_pos) {
   return place;
 }
 
-phi::DenseTensor CastPyArg2FrameworkTensor(PyObject* obj, ssize_t arg_pos) {
+phi::DTensor CastPyArg2FrameworkTensor(PyObject* obj, ssize_t arg_pos) {
   if (PyObject_IsInstance(
           obj, reinterpret_cast<PyObject*>(g_framework_tensor_pytype))) {
-    return ::pybind11::handle(obj).cast<phi::DenseTensor>();
+    return ::pybind11::handle(obj).cast<phi::DTensor>();
   } else {
     PADDLE_THROW(platform::errors::InvalidArgument(
         "argument (position %d) must be "

@@ -28,6 +28,7 @@ limitations under the License. */
 #include "paddle/phi/common/data_type.h"
 #include "paddle/phi/core/compat/convert_utils.h"
 #include "paddle/phi/core/dense_tensor.h"
+#include "paddle/phi/core/distributed_tensor.h"
 #include "pybind11/detail/internals.h"
 #include "pybind11/numpy.h"
 #include "pybind11/pybind11.h"
@@ -76,19 +77,27 @@ void EmptyTensorInitializer(TensorObject* self,
   }
   if (var_type == paddle::framework::proto::VarType::LOD_TENSOR) {
     // TODO(jiabin): Maybe support LOD later
-    std::shared_ptr<phi::DenseTensor> dense_tensor = nullptr;
+    std::shared_ptr<phi::DTensor> dense_tensor = nullptr;
     if (dims.size() == 1 && dims[0] == 0) {
       std::shared_ptr<phi::Allocation> allocation_ptr = nullptr;
-      dense_tensor = std::make_shared<phi::DenseTensor>(
+      dense_tensor = std::make_shared<phi::DTensor>(
           allocation_ptr,
           phi::DenseTensorMeta(paddle::framework::TransToPhiDataType(dtype),
-                               ddims));
+                               ddims),
+          phi::DTensorMeta(phi::DeviceMesh(std::string("cuda"),
+                                           std::vector<std::vector<int64_t>>(
+                                               {{0, 1, 2, 3}})),
+                           phi::Replicate()));
     } else {
       // TODO(dev): we need enhance check for ddims.
-      dense_tensor = std::make_shared<phi::DenseTensor>(
+      dense_tensor = std::make_shared<phi::DTensor>(
           std::make_shared<phi::Allocation>(),
           phi::DenseTensorMeta(paddle::framework::TransToPhiDataType(dtype),
-                               ddims));
+                               ddims),
+          phi::DTensorMeta(phi::DeviceMesh(std::string("cuda"),
+                                           std::vector<std::vector<int64_t>>(
+                                               {{0, 1, 2, 3}})),
+                           phi::Replicate()));
     }
     self->tensor.set_impl(dense_tensor);
   } else if (var_type == paddle::framework::proto::VarType::SELECTED_ROWS) {
@@ -137,8 +146,8 @@ void InitTensorWithNumpyValue(TensorObject* self,
           "EmptyTensorInitializer is "
           "forbidden. Please check your code and make sure you new a "
           "eager tensor before init it with NumPy."));
-  phi::DenseTensor* impl_ptr =
-      static_cast<phi::DenseTensor*>(self->tensor.impl().get());
+  phi::DTensor* impl_ptr =
+      static_cast<phi::DTensor*>(self->tensor.impl().get());
   if (platform::is_cpu_place(place)) {
     SetTensorFromPyArray<platform::CPUPlace>(impl_ptr, array, place, zero_copy);
   } else if (platform::is_xpu_place(place)) {
@@ -206,16 +215,16 @@ void InitTensorWithTensor(TensorObject* self,
 }
 
 void InitTensorWithFrameworkTensor(TensorObject* self,
-                                   const phi::DenseTensor& src,
+                                   const phi::DTensor& src,
                                    const paddle::platform::Place& place,
                                    const std::string& name) {
   self->tensor.set_name(name);
   if (place == src.place()) {
-    self->tensor.set_impl(std::make_shared<phi::DenseTensor>(src));
+    self->tensor.set_impl(std::make_shared<phi::DTensor>(src));
     VLOG(4) << "Same place, do ShareDataWith";
   } else {
     auto temp =
-        paddle::experimental::Tensor(std::make_shared<phi::DenseTensor>(src));
+        paddle::experimental::Tensor(std::make_shared<phi::DTensor>(src));
     self->tensor.set_impl(temp.copy_to(place, true).impl());
     VLOG(4) << "Different place, do TensorCopy";
   }
@@ -428,7 +437,7 @@ void AutoInitTensorByTensor(TensorObject* py_tensor_ptr,
     InitTensorWithTensor(py_tensor_ptr, src_tensor, place, act_name);
   } else {
     // init by framework tensor
-    phi::DenseTensor src_tensor;
+    phi::DTensor src_tensor;
     if (kw_order_map["value"] <= args_num) {
       src_tensor = CastPyArg2FrameworkTensor(
           PyTuple_GET_ITEM(args, kw_order_map["value"] - 1),
