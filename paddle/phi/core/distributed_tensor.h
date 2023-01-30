@@ -37,6 +37,8 @@ class DTensor : public DenseTensor, public TypeInfoTraits<TensorBase, DTensor> {
 
   DTensor(DTensor&& other) = default;
 
+  DTensor(const DenseTensor& other, const DTensorMeta& dist_meta);
+
   DTensor(const DTensor& other);
 
   virtual ~DTensor() = default;

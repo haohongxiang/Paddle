@@ -106,6 +106,10 @@ class DenseTensor : public TensorBase,
   /// \return The meta information of the tensor.
   const DenseTensorMeta& meta() const noexcept { return meta_; }
 
+  const std::shared_ptr<phi::Allocation>& holder() const noexcept {
+    return holder_;
+  }
+
   /// \brief Sets the meta information of the tensor. Only when the original
   /// attribute of Tensor is incomplete, can it be reset.
   /// \param meta The meta information of the tensor.

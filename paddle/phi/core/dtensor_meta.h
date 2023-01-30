@@ -21,37 +21,25 @@ limitations under the License. */
 
 namespace phi {
 
+enum class PlacementType : uint8_t {
+  Shard = 0,
+  Partial,
+  Replicate,
+};
+
 class Placement {
  public:
-  bool is_shard() { return false; }
+  explicit Placement(const PlacementType& placement) : p_type_(placement) {}
+  Placement(const PlacementType& placement, const int64_t dim)
+      : p_type_(placement), dim_(dim) {}
 
-  bool is_partial() { return false; }
-
-  bool is_replicate() { return false; }
-};
-
-class Shard : public Placement {
- public:
-  explicit Shard(int64_t dim) : dim_(dim) {}
-
-  bool is_shard() { return true; }
+  bool is_shard() { return p_type_ == PlacementType::Shard; }
+  bool is_partial() { return p_type_ == PlacementType::Partial; }
+  bool is_replicate() { return p_type_ == PlacementType::Replicate; }
 
  private:
-  int64_t dim_;
-};
-
-class Partial : public Placement {
- public:
-  Partial();
-
-  bool is_partial() { return true; }
-};
-
-class Replicate : public Placement {
- public:
-  Replicate();
-
-  bool is_replicate() { return true; }
+  PlacementType p_type_{PlacementType::Replicate};
+  int64_t dim_{-1};
 };
 
 class DeviceMesh {
@@ -66,12 +54,13 @@ class DeviceMesh {
 
 struct DTensorMeta {
   DTensorMeta() = default;
-  explicit DTensorMeta(DeviceMesh device_mesh) : device_mesh_(device_mesh) {}
-  explicit DTensorMeta(DeviceMesh device_mesh, Placement placement)
+  explicit DTensorMeta(const DeviceMesh& device_mesh)
+      : device_mesh_(device_mesh), placement_(PlacementType::Replicate) {}
+  DTensorMeta(const DeviceMesh& device_mesh, const Placement& placement)
       : device_mesh_(device_mesh), placement_(placement) {}
 
   DeviceMesh device_mesh_;
-  Placement placement_{Replicate()};
+  Placement placement_;
 };
 
 }  // namespace phi

@@ -84,20 +84,18 @@ void EmptyTensorInitializer(TensorObject* self,
           allocation_ptr,
           phi::DenseTensorMeta(paddle::framework::TransToPhiDataType(dtype),
                                ddims),
-          phi::DTensorMeta(phi::DeviceMesh(std::string("cuda"),
-                                           std::vector<std::vector<int64_t>>(
-                                               {{0, 1, 2, 3}})),
-                           phi::Replicate()));
+          phi::DTensorMeta(phi::DeviceMesh(
+              std::string("cuda"),
+              std::vector<std::vector<int64_t>>({{0, 1, 2, 3}}))));
     } else {
       // TODO(dev): we need enhance check for ddims.
       dense_tensor = std::make_shared<phi::DTensor>(
           std::make_shared<phi::Allocation>(),
           phi::DenseTensorMeta(paddle::framework::TransToPhiDataType(dtype),
                                ddims),
-          phi::DTensorMeta(phi::DeviceMesh(std::string("cuda"),
-                                           std::vector<std::vector<int64_t>>(
-                                               {{0, 1, 2, 3}})),
-                           phi::Replicate()));
+          phi::DTensorMeta(phi::DeviceMesh(
+              std::string("cuda"),
+              std::vector<std::vector<int64_t>>({{0, 1, 2, 3}}))));
     }
     self->tensor.set_impl(dense_tensor);
   } else if (var_type == paddle::framework::proto::VarType::SELECTED_ROWS) {
@@ -215,16 +213,23 @@ void InitTensorWithTensor(TensorObject* self,
 }
 
 void InitTensorWithFrameworkTensor(TensorObject* self,
-                                   const phi::DTensor& src,
+                                   const phi::DenseTensor& src,
                                    const paddle::platform::Place& place,
                                    const std::string& name) {
   self->tensor.set_name(name);
   if (place == src.place()) {
-    self->tensor.set_impl(std::make_shared<phi::DTensor>(src));
+    self->tensor.set_impl(std::make_shared<phi::DTensor>(
+        phi::DTensor(src,
+                     phi::DTensorMeta(phi::DeviceMesh(
+                         std::string("cuda"),
+                         std::vector<std::vector<int64_t>>({{0, 1, 2, 3}}))))));
     VLOG(4) << "Same place, do ShareDataWith";
   } else {
-    auto temp =
-        paddle::experimental::Tensor(std::make_shared<phi::DTensor>(src));
+    auto temp = paddle::experimental::Tensor(std::make_shared<phi::DTensor>(
+        phi::DTensor(src,
+                     phi::DTensorMeta(phi::DeviceMesh(
+                         std::string("cuda"),
+                         std::vector<std::vector<int64_t>>({{0, 1, 2, 3}}))))));
     self->tensor.set_impl(temp.copy_to(place, true).impl());
     VLOG(4) << "Different place, do TensorCopy";
   }
@@ -437,7 +442,7 @@ void AutoInitTensorByTensor(TensorObject* py_tensor_ptr,
     InitTensorWithTensor(py_tensor_ptr, src_tensor, place, act_name);
   } else {
     // init by framework tensor
-    phi::DTensor src_tensor;
+    phi::DenseTensor src_tensor;
     if (kw_order_map["value"] <= args_num) {
       src_tensor = CastPyArg2FrameworkTensor(
           PyTuple_GET_ITEM(args, kw_order_map["value"] - 1),

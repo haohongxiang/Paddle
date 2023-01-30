@@ -32,6 +32,12 @@ DTensor::DTensor(const std::shared_ptr<phi::Allocation>& holder,
   holder_ = holder;
 }
 
+DTensor::DTensor(const DenseTensor& other, const DTensorMeta& dist_meta)
+    : dist_meta_(dist_meta) {
+  meta_ = other.meta();
+  holder_ = other.holder();
+}
+
 DTensor::DTensor(const DTensor& other)
     : DenseTensor(), dist_meta_(other.dist_meta_) {
   meta_ = other.meta_;
