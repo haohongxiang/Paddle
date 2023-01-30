@@ -59,9 +59,14 @@ cc_library(
   DEPS phi_enforce)
 
 cc_library(
+  dtensor_meta
+  SRCS dtensor_meta.cc
+  DEPS phi_enforce)
+
+cc_library(
   dense_tensor
   SRCS dense_tensor.cc dense_tensor_impl.cc distributed_tensor.cc
-  DEPS convert_utils tensor_meta tensor_base ddim)
+  DEPS convert_utils tensor_meta dtensor_meta tensor_base ddim)
 
 target_link_libraries(dense_tensor malloc)
 
