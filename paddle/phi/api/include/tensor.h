@@ -222,6 +222,14 @@ class PADDLE_API Tensor final {
   bool is_dense_tensor() const;
 
   /**
+   * @brief Determine whether tensor is DTensor
+   *
+   * @return true
+   * @return false
+   */
+  bool is_distributed_tensor() const;
+
+  /**
    * @brief Determine whether tensor is SelectedRows
    *
    * @return true

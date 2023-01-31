@@ -17,6 +17,7 @@ limitations under the License. */
 #include "glog/logging.h"
 
 #include "paddle/phi/core/dense_tensor.h"
+#include "paddle/phi/core/distributed_tensor.h"
 #include "paddle/phi/core/enforce.h"
 #include "paddle/phi/core/selected_rows.h"
 #include "paddle/phi/core/string_tensor.h"
@@ -72,6 +73,9 @@ void MetaTensor::set_dims(const DDim& dims) {
   } else if (phi::SparseCsrTensor::classof(tensor_)) {
     DenseTensorUtils::GetMutableMeta(static_cast<SparseCsrTensor*>(tensor_))
         ->dims = dims;
+  } else if (phi::DTensor::classof(tensor_)) {
+    DenseTensorUtils::GetMutableMeta(static_cast<DTensor*>(tensor_))->dims =
+        dims;
   } else {
     PADDLE_THROW(phi::errors::Unimplemented(
         "Unsupported setting dims for `%s`.", tensor_->type_info().name()));
