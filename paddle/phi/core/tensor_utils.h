@@ -15,6 +15,7 @@ limitations under the License. */
 #pragma once
 
 #include "paddle/phi/core/dense_tensor.h"
+#include "paddle/phi/core/device_context.h"
 #include "paddle/phi/core/distributed_tensor.h"
 #include "paddle/phi/core/selected_rows.h"
 #include "paddle/phi/core/sparse_coo_tensor.h"
@@ -113,5 +114,21 @@ void Copy(const Context& dev_ctx,
           Place dst_place,
           bool blocking,
           SparseCsrTensor* dst);
+
+template <typename T>
+void TensorFromVector(const std::vector<T>& src,
+                      const phi::DeviceContext& ctx,
+                      phi::DenseTensor* dst);
+
+template <typename T>
+void TensorFromArray(const T* src,
+                     const size_t& array_size,
+                     const phi::DeviceContext& ctx,
+                     phi::DenseTensor* dst);
+
+template <typename T>
+void TensorToVector(const phi::DenseTensor& src,
+                    const phi::DeviceContext& ctx,
+                    std::vector<T>* dst);
 
 }  // namespace phi
