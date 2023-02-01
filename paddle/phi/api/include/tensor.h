@@ -227,7 +227,7 @@ class PADDLE_API Tensor final {
    * @return true
    * @return false
    */
-  bool is_distributed_tensor() const;
+  bool is_dist_tensor() const;
 
   /**
    * @brief Determine whether tensor is SelectedRows

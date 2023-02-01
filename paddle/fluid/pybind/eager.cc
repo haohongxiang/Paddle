@@ -77,10 +77,10 @@ void EmptyTensorInitializer(TensorObject* self,
   }
   if (var_type == paddle::framework::proto::VarType::LOD_TENSOR) {
     // TODO(jiabin): Maybe support LOD later
-    std::shared_ptr<phi::DistTensor> dense_tensor = nullptr;
+    std::shared_ptr<phi::DistTensor> dist_tensor = nullptr;
     if (dims.size() == 1 && dims[0] == 0) {
       std::shared_ptr<phi::Allocation> allocation_ptr = nullptr;
-      dense_tensor = std::make_shared<phi::DistTensor>(
+      dist_tensor = std::make_shared<phi::DistTensor>(
           phi::DenseTensor(
               allocation_ptr,
               phi::DenseTensorMeta(paddle::framework::TransToPhiDataType(dtype),
@@ -90,7 +90,7 @@ void EmptyTensorInitializer(TensorObject* self,
               std::vector<std::vector<int64_t>>({{0, 1, 2, 3}}))));
     } else {
       // TODO(dev): we need enhance check for ddims.
-      dense_tensor = std::make_shared<phi::DistTensor>(
+      dist_tensor = std::make_shared<phi::DistTensor>(
           phi::DenseTensor(
               std::make_shared<phi::Allocation>(),
               phi::DenseTensorMeta(paddle::framework::TransToPhiDataType(dtype),
@@ -99,7 +99,7 @@ void EmptyTensorInitializer(TensorObject* self,
               std::string("cuda"),
               std::vector<std::vector<int64_t>>({{0, 1, 2, 3}}))));
     }
-    self->tensor.set_impl(dense_tensor);
+    self->tensor.set_impl(dist_tensor);
   } else if (var_type == paddle::framework::proto::VarType::SELECTED_ROWS) {
     std::shared_ptr<phi::SelectedRows> tensor =
         std::make_shared<phi::SelectedRows>();
@@ -839,6 +839,7 @@ int TensorInit(PyObject* self, PyObject* args, PyObject* kwargs) {
             CastPyArg2ProtoType(PyTuple_GET_ITEM(args, 0), 0);
         std::vector<int> dims =
             CastPyArg2VectorOfInt(PyTuple_GET_ITEM(args, 1), 1);
+
         std::string act_name = "";
         PyObject* name_obj = PyTuple_GET_ITEM(args, 2);
         if (name_obj == Py_None) {

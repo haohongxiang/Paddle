@@ -69,7 +69,7 @@ class DistTensor : public TensorBase,
   friend class DenseTensorUtils;
 
  protected:
-  std::shared_ptr<DenseTensor> value_{nullptr};
+  std::shared_ptr<DenseTensor> value_{new DenseTensor()};
   DTensorMeta dist_meta_{DTensorMeta()};
 };
 
