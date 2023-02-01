@@ -44,18 +44,9 @@ class TypeInfoTraits {
  public:
   static const TypeInfo<BaseT> kType;
   TypeInfoTraits() {
-    // std::cout << "DerivedT : " <<
-    // static_cast<DerivedT*>(this)->type_info().name() << std::endl; std::cout
-    // << "BaseT : " <<
-    // static_cast<BaseT*>(static_cast<DerivedT*>(this))->type_info().name() <<
-    // std::endl;
     static_cast<BaseT*>(static_cast<DerivedT*>(this))->type_info_ = kType;
   }
-  static bool classof(const BaseT* obj) {
-    std::cout << "obj->type_info() : " << obj->type_info().name() << std::endl;
-    std::cout << "kType : " << kType.name() << std::endl;
-    return obj->type_info() == kType;
-  }
+  static bool classof(const BaseT* obj) { return obj->type_info() == kType; }
 };
 
 template <typename BaseT>
