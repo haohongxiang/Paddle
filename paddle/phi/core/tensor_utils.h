@@ -29,8 +29,8 @@ class DenseTensorUtils {
     return &(tensor->meta_);
   }
 
-  static DenseTensorMeta* GetMutableMeta(DTensor* tensor) {
-    return &(tensor->meta_);
+  static DenseTensorMeta* GetMutableMeta(DistTensor* tensor) {
+    return &(tensor->value_->meta_);
   }
 
   static SparseTensorMeta* GetMutableMeta(SparseCooTensor* tensor) {

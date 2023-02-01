@@ -127,7 +127,7 @@ bool Tensor::is_dense_tensor() const {
   return phi::DenseTensor::classof(impl_.get());
 }
 bool Tensor::is_distributed_tensor() const {
-  return phi::DTensor::classof(impl_.get());
+  return phi::DistTensor::classof(impl_.get());
 }
 bool Tensor::is_selected_rows() const {
   return phi::SelectedRows::classof(impl_.get());

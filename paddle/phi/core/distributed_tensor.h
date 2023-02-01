@@ -23,34 +23,54 @@ limitations under the License. */
 
 namespace phi {
 
-class DTensor : public DenseTensor, public TypeInfoTraits<TensorBase, DTensor> {
+class DistTensor : public TensorBase,
+                   public TypeInfoTraits<TensorBase, DistTensor> {
  public:
-  DTensor();
+  DistTensor() { value_.reset(new DenseTensor()); }
 
-  DTensor(Allocator* a,
-          const DenseTensorMeta& meta,
-          const DTensorMeta& dist_meta);
+  DistTensor(DistTensor&& other) = default;
 
-  DTensor(const std::shared_ptr<phi::Allocation>& holder,
-          const DenseTensorMeta& meta,
-          const DTensorMeta& dist_meta);
+  DistTensor(const DenseTensor& other, const DTensorMeta& dist_meta);
 
-  DTensor(DTensor&& other) = default;
+  DistTensor(const DistTensor& other);
 
-  DTensor(const DenseTensor& other, const DTensorMeta& dist_meta);
+  virtual ~DistTensor() = default;
 
-  DTensor(const DTensor& other);
+  DistTensor& operator=(const DistTensor& other);
 
-  virtual ~DTensor() = default;
+  DistTensor& operator=(DistTensor&& other);
 
-  DTensor& operator=(const DTensor& other);
+  void* AllocateFrom(Allocator* allocator,
+                     DataType dtype,
+                     size_t requested_size = 0,
+                     bool fake_alloc = false);
 
-  DTensor& operator=(DTensor&& other);
+  static const char* name() { return "DistTensor"; }
 
-  static const char* name() { return "DTensor"; }
+  const DenseTensor& value() const { return *value_; }
+
+  DenseTensor* mutable_value() { return value_.get(); }
+
+  int64_t numel() const { return value_->numel(); }
+
+  const DDim& dims() const noexcept { return value_->dims(); }
+
+  DataType dtype() const noexcept { return value_->dtype(); }
+
+  DataLayout layout() const noexcept { return value_->layout(); }
+
+  const Place& place() const { return value_->place(); }
+
+  bool valid() const noexcept { return value_->valid(); }
+
+  bool initialized() const { return value_->initialized(); }
 
  private:
-  DTensorMeta dist_meta_;
+  friend class DenseTensorUtils;
+
+ protected:
+  std::shared_ptr<DenseTensor> value_{nullptr};
+  DTensorMeta dist_meta_{DTensorMeta()};
 };
 
 }  // namespace phi

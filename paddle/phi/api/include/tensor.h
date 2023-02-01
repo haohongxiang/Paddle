@@ -222,7 +222,7 @@ class PADDLE_API Tensor final {
   bool is_dense_tensor() const;
 
   /**
-   * @brief Determine whether tensor is DTensor
+   * @brief Determine whether tensor is DistTensor
    *
    * @return true
    * @return false

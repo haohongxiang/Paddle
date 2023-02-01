@@ -29,6 +29,7 @@ enum class PlacementType : uint8_t {
 
 class Placement {
  public:
+  Placement() {}
   explicit Placement(const PlacementType& placement) : p_type_(placement) {}
   Placement(const PlacementType& placement, const int64_t dim)
       : p_type_(placement), dim_(dim) {}
@@ -44,6 +45,7 @@ class Placement {
 
 class DeviceMesh {
  public:
+  DeviceMesh() {}
   DeviceMesh(std::string device_type, std::vector<std::vector<int64_t>> mesh)
       : device_type_(device_type), mesh_(mesh) {}
 
@@ -53,7 +55,7 @@ class DeviceMesh {
 };
 
 struct DTensorMeta {
-  DTensorMeta() = default;
+  DTensorMeta() {}
   explicit DTensorMeta(const DeviceMesh& device_mesh)
       : device_mesh_(device_mesh), placement_(PlacementType::Replicate) {}
   DTensorMeta(const DeviceMesh& device_mesh, const Placement& placement)

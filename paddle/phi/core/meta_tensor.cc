@@ -73,8 +73,8 @@ void MetaTensor::set_dims(const DDim& dims) {
   } else if (phi::SparseCsrTensor::classof(tensor_)) {
     DenseTensorUtils::GetMutableMeta(static_cast<SparseCsrTensor*>(tensor_))
         ->dims = dims;
-  } else if (phi::DTensor::classof(tensor_)) {
-    DenseTensorUtils::GetMutableMeta(static_cast<DTensor*>(tensor_))->dims =
+  } else if (phi::DistTensor::classof(tensor_)) {
+    DenseTensorUtils::GetMutableMeta(static_cast<DistTensor*>(tensor_))->dims =
         dims;
   } else {
     PADDLE_THROW(phi::errors::Unimplemented(
