@@ -189,7 +189,27 @@ phi::DenseTensor* SetKernelOutput(Tensor* out) {
     if (out->impl() == nullptr) {
       out->set_impl(std::make_shared<phi::DenseTensor>());
     }
-    return static_cast<phi::DenseTensor*>(out->impl().get());
+
+    if (out->is_dense_tensor()) {
+      VLOG(0) << "----- SetKernelOutput -----";
+      return static_cast<phi::DenseTensor*>(out->impl().get());
+    } else if (out->is_dist_tensor()) {
+      VLOG(0) << "----- SetDistKernelOutput -----";
+      return static_cast<phi::DenseTensor*>(
+          static_cast<phi::DistTensor*>(out->impl().get())->mutable_value());
+    }
+  }
+  return nullptr;
+}
+
+phi::DenseTensor* SetDistKernelOutput(Tensor* out) {
+  if (out) {
+    if (out->impl() == nullptr) {
+      out->set_impl(std::make_shared<phi::DenseTensor>(
+          std::make_shared<phi::DistTensor>()->value()));
+    }
+    return static_cast<phi::DenseTensor*>(
+        static_cast<phi::DistTensor*>(out->impl().get())->mutable_value());
   }
   return nullptr;
 }

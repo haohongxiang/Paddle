@@ -17,6 +17,7 @@ limitations under the License. */
 #include "paddle/phi/api/include/tensor.h"
 #include "paddle/phi/core/compat/convert_utils.h"
 #include "paddle/phi/core/dense_tensor.h"
+#include "paddle/phi/core/distributed_tensor.h"
 #include "paddle/phi/core/meta_tensor.h"
 #include "paddle/phi/core/selected_rows.h"
 #include "paddle/phi/core/sparse_coo_tensor.h"
@@ -88,6 +89,8 @@ std::vector<phi::MetaTensor> MakeMetaTensor(
 /* ------------------ for output ----------------------- */
 
 phi::DenseTensor* SetKernelOutput(Tensor* out);
+
+phi::DenseTensor* SetDistKernelOutput(Tensor* out);
 
 std::vector<phi::DenseTensor*> SetKernelOutput(size_t out_size,
                                                std::vector<Tensor>* out);

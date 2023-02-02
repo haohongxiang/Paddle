@@ -29,6 +29,7 @@
 #include "paddle/fluid/eager/grad_node_info.h"
 #include "paddle/fluid/eager/utils.h"
 #include "paddle/phi/api/lib/utils/allocator.h"
+#include "paddle/phi/core/distributed_tensor.h"
 #ifndef PADDLE_NO_PYTHON
 #include "paddle/fluid/eager/hooks.h"
 #endif
@@ -46,6 +47,11 @@ class TensorWrapper {
           static_cast<phi::DenseTensor*>(tensor.impl().get());
       auto& inplace_version_counter = dense_tensor->InplaceVersionCounter();
       inplace_version_snapshot_ = inplace_version_counter.CurrentVersion();
+    } else if (tensor.impl() && phi::DistTensor::classof(tensor.impl().get())) {
+      phi::DenseTensor* dense_tensor = static_cast<phi::DenseTensor*>(
+          static_cast<phi::DistTensor*>(tensor.impl().get())->mutable_value());
+      auto& inplace_version_counter = dense_tensor->InplaceVersionCounter();
+      inplace_version_snapshot_ = inplace_version_counter.CurrentVersion();
     }
 
     /**
@@ -57,20 +63,25 @@ class TensorWrapper {
     no_need_buffer_ = no_need_buffer;
     // shallow copy tensor_impl here
     if (no_need_buffer) {
+      phi::DenseTensor* dense_tensor = nullptr;
       if (phi::DenseTensor::classof(tensor.impl().get())) {
         // Only Copy Meta
-        phi::DenseTensor* dense_tensor =
-            static_cast<phi::DenseTensor*>(tensor.impl().get());
-        // TODO(jiabin): It's not a good idea to set memory size to zero, find
-        // another way and change this.
-        intermidiate_tensor_.set_impl(
-            std::move(std::make_shared<phi::DenseTensor>(
-                std::make_shared<phi::Allocation>(nullptr, 0, tensor.place()),
-                std::move(dense_tensor->meta()))));
+        dense_tensor = static_cast<phi::DenseTensor*>(tensor.impl().get());
+      } else if (phi::DistTensor::classof(tensor.impl().get())) {
+        // Only Copy Meta
+        dense_tensor = static_cast<phi::DenseTensor*>(
+            static_cast<phi::DistTensor*>(tensor.impl().get())
+                ->mutable_value());
       } else {
         PADDLE_THROW(paddle::platform::errors::Fatal(
             "Unrecognized tensor type for no_need_buffer feature"));
       }
+      // TODO(jiabin): It's not a good idea to set memory size to zero, find
+      // another way and change this.
+      intermidiate_tensor_.set_impl(
+          std::move(std::make_shared<phi::DenseTensor>(
+              std::make_shared<phi::Allocation>(nullptr, 0, tensor.place()),
+              std::move(dense_tensor->meta()))));
     } else {
 #ifndef PADDLE_NO_PYTHON
       if (egr::SavedTensorsHooks::GetInstance().IsEnable() &&

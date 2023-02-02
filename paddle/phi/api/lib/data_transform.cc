@@ -230,7 +230,7 @@ std::shared_ptr<phi::DenseTensor> PrepareData(
     const phi::TensorArgDef& target_args_def,
     const TransformFlag& transform_flag) {
   const auto& tensor_in = input.impl();
-  if (tensor_in) {
+  if (tensor_in && input.is_dense_tensor()) {
     phi::DenseTensor& dense_tensor =
         *static_cast<phi::DenseTensor*>(tensor_in.get());
     if (!transform_flag.NeedTransform() || !dense_tensor.initialized() ||
@@ -243,6 +243,36 @@ std::shared_ptr<phi::DenseTensor> PrepareData(
                               dense_tensor.place(),
                               transform_flag))) {
       return std::static_pointer_cast<phi::DenseTensor>(tensor_in);
+    }
+    phi::DenseTensor out =
+        TransformData(&dense_tensor, target_args_def, transform_flag);
+    return std::make_shared<phi::DenseTensor>(std::move(out));
+  } else if (tensor_in && input.is_dist_tensor()) {
+    return PrepareDataForDistTensor(input, target_args_def, transform_flag);
+  }
+  return nullptr;
+}
+
+std::shared_ptr<phi::DenseTensor> PrepareDataForDistTensor(
+    const Tensor& input,
+    const phi::TensorArgDef& target_args_def,
+    const TransformFlag& transform_flag) {
+  const auto& tensor_in = input.impl();
+  if (tensor_in) {
+    phi::DenseTensor& dense_tensor = *static_cast<phi::DenseTensor*>(
+        static_cast<phi::DistTensor*>(tensor_in.get())->mutable_value());
+
+    if (!transform_flag.NeedTransform() || !dense_tensor.initialized() ||
+        (!NeedTransformPlace(
+             dense_tensor.place(), target_args_def.backend, transform_flag) &&
+         !NeedTransformDataType(
+             dense_tensor.dtype(), target_args_def.dtype, transform_flag) &&
+         !NeedTransformLayout(dense_tensor.layout(),
+                              target_args_def.layout,
+                              dense_tensor.place(),
+                              transform_flag))) {
+      return std::make_shared<phi::DenseTensor>(
+          static_cast<phi::DistTensor*>(tensor_in.get())->value());
     }
     phi::DenseTensor out =
         TransformData(&dense_tensor, target_args_def, transform_flag);
