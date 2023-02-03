@@ -17,6 +17,10 @@ limitations under the License. */
 
 namespace phi {
 
+DistTensor::DistTensor(const DTensorMeta& dist_meta) : dist_meta_(dist_meta) {
+  value_.reset(new DenseTensor());
+}
+
 DistTensor::DistTensor(const DenseTensor& other, const DTensorMeta& dist_meta)
     : dist_meta_(dist_meta) {
   value_ = std::make_shared<DenseTensor>(other);

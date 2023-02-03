@@ -163,7 +163,7 @@ PADDLE_API void {api_func_name}({self.get_declare_args()});
             )
             output_create = ""
             set_out_func = (
-                'SetKernelOutput'
+                'SetDistKernelOutput'
                 if out_tensor_type_list is None
                 or out_tensor_type_list[0] == 'dense'
                 else 'SetSelectedRowsKernelOutput'
@@ -191,7 +191,7 @@ PADDLE_API void {api_func_name}({self.get_declare_args()});
                 kernel_output.append(f'kernel_out_{i}')
                 output_names.append(f'kernel_out_{i}')
                 set_out_func = (
-                    'SetKernelOutput'
+                    'SetDistKernelOutput'
                     if out_tensor_type_list is None
                     or out_tensor_type_list[i] == 'dense'
                     else 'SetSelectedRowsKernelOutput'

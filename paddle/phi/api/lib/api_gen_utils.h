@@ -95,6 +95,9 @@ phi::DenseTensor* SetDistKernelOutput(Tensor* out);
 std::vector<phi::DenseTensor*> SetKernelOutput(size_t out_size,
                                                std::vector<Tensor>* out);
 
+std::vector<phi::DenseTensor*> SetDistKernelOutput(size_t out_size,
+                                                   std::vector<Tensor>* out);
+
 std::vector<phi::DenseTensor*> SetInplaceVectorKernelOutput(
     size_t out_size, std::vector<Tensor>* out);
 
@@ -103,6 +106,8 @@ std::vector<phi::DenseTensor*> SetInplaceOptionalVectorKernelOutput(
 
 // For backward api
 std::vector<phi::DenseTensor*> SetKernelOutput(std::vector<Tensor*>* out);
+
+std::vector<phi::DenseTensor*> SetDistKernelOutput(std::vector<Tensor*>* out);
 
 phi::SelectedRows* SetSelectedRowsKernelOutput(Tensor* out);
 

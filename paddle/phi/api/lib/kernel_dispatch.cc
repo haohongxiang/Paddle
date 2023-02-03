@@ -36,6 +36,9 @@ bool HasAllocation(const phi::TensorBase& t) {
   if (phi::DenseTensor::classof(&t)) {
     return phi::DenseTensorUtils::GetHolder(
                static_cast<const phi::DenseTensor&>(t)) != nullptr;
+  } else if (phi::DistTensor::classof(&t)) {
+    return phi::DenseTensorUtils::GetHolder(
+               static_cast<const phi::DistTensor&>(t).value()) != nullptr;
   } else if (phi::SelectedRows::classof(&t)) {
     return phi::DenseTensorUtils::GetHolder(
                static_cast<const phi::SelectedRows&>(t).value()) != nullptr;

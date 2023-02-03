@@ -205,8 +205,9 @@ phi::DenseTensor* SetKernelOutput(Tensor* out) {
 phi::DenseTensor* SetDistKernelOutput(Tensor* out) {
   if (out) {
     if (out->impl() == nullptr) {
-      out->set_impl(std::make_shared<phi::DenseTensor>(
-          std::make_shared<phi::DistTensor>()->value()));
+      out->set_impl(std::make_shared<phi::DistTensor>(phi::DTensorMeta(
+          phi::DeviceMesh(std::string("cuda"),
+                          std::vector<std::vector<int64_t>>({{0, 1, 2, 3}})))));
     }
     return static_cast<phi::DenseTensor*>(
         static_cast<phi::DistTensor*>(out->impl().get())->mutable_value());
@@ -221,6 +222,21 @@ std::vector<phi::DenseTensor*> SetKernelOutput(size_t out_size,
   for (size_t i = 0; i < out_size; ++i) {
     auto tensor_ptr = std::make_shared<phi::DenseTensor>();
     results[i] = tensor_ptr.get();
+    out->emplace_back();
+    out->back().set_impl(tensor_ptr);
+  }
+  return results;
+}
+
+std::vector<phi::DenseTensor*> SetDistKernelOutput(size_t out_size,
+                                                   std::vector<Tensor>* out) {
+  out->reserve(out_size);
+  std::vector<phi::DenseTensor*> results(out_size);
+  for (size_t i = 0; i < out_size; ++i) {
+    auto tensor_ptr = std::make_shared<phi::DistTensor>(phi::DTensorMeta(
+        phi::DeviceMesh(std::string("cuda"),
+                        std::vector<std::vector<int64_t>>({{0, 1, 2, 3}}))));
+    results[i] = tensor_ptr.get()->mutable_value();
     out->emplace_back();
     out->back().set_impl(tensor_ptr);
   }
@@ -254,6 +270,20 @@ std::vector<phi::DenseTensor*> SetKernelOutput(std::vector<Tensor*>* out) {
     if (out->at(i)) {
       auto tensor_ptr = std::make_shared<phi::DenseTensor>();
       results[i] = tensor_ptr.get();
+      (*out)[i]->set_impl(tensor_ptr);
+    }
+  }
+  return results;
+}
+
+std::vector<phi::DenseTensor*> SetDistKernelOutput(std::vector<Tensor*>* out) {
+  std::vector<phi::DenseTensor*> results(out->size(), nullptr);
+  for (size_t i = 0; i < out->size(); ++i) {
+    if (out->at(i)) {
+      auto tensor_ptr = std::make_shared<phi::DistTensor>(phi::DTensorMeta(
+          phi::DeviceMesh(std::string("cuda"),
+                          std::vector<std::vector<int64_t>>({{0, 1, 2, 3}}))));
+      results[i] = tensor_ptr.get()->mutable_value();
       (*out)[i]->set_impl(tensor_ptr);
     }
   }

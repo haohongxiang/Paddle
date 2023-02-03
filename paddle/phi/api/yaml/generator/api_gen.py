@@ -188,7 +188,7 @@ class ForwardAPI(BaseAPI):
             output_create = f"""
 {code_indent}  {return_type} api_output{inplace_assign};"""
             set_out_func = (
-                'SetKernelOutput'
+                'SetDistKernelOutput'
                 if out_tensor_type_list is None
                 or out_tensor_type_list[0] == 'dense'
                 else 'SetSelectedRowsKernelOutput'
@@ -242,7 +242,7 @@ class ForwardAPI(BaseAPI):
                 kernel_output.append(f'kernel_out_{i}')
                 output_names.append(f'kernel_out_{i}')
                 set_out_func = (
-                    'SetKernelOutput'
+                    'SetDistKernelOutput'
                     if out_tensor_type_list is None
                     or out_tensor_type_list[i] == 'dense'
                     else 'SetSelectedRowsKernelOutput'

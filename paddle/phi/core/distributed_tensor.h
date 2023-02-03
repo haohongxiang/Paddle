@@ -28,6 +28,8 @@ class DistTensor : public TensorBase,
  public:
   DistTensor() { value_.reset(new DenseTensor()); }
 
+  DistTensor(const DTensorMeta& dist_meta);
+
   DistTensor(DistTensor&& other) = default;
 
   DistTensor(const DenseTensor& other, const DTensorMeta& dist_meta);
