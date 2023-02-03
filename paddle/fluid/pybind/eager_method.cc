@@ -42,6 +42,7 @@ typedef SSIZE_T ssize_t;
 #include "paddle/phi/common/data_type.h"
 #include "paddle/phi/core/compat/convert_utils.h"
 #include "paddle/phi/core/dense_tensor.h"
+#include "paddle/phi/core/distributed_tensor.h"
 #include "paddle/phi/core/sparse_coo_tensor.h"
 #include "paddle/phi/core/sparse_csr_tensor.h"
 #include "pybind11/detail/internals.h"
@@ -762,6 +763,12 @@ static PyObject* tensor_method_get_underline_tensor(TensorObject* self,
   }
   if (self->tensor.is_dense_tensor()) {
     auto* tensor = static_cast<phi::DenseTensor*>(self->tensor.impl().get());
+    VLOG(6) << "tensor: " << tensor->IsInitialized();
+    return ToPyObject(tensor);
+  } else if (self->tensor.is_dist_tensor()) {
+    auto* tensor = static_cast<phi::DenseTensor*>(
+        static_cast<phi::DistTensor*>(self->tensor.impl().get())
+            ->mutable_value());
     VLOG(6) << "tensor: " << tensor->IsInitialized();
     return ToPyObject(tensor);
   } else {

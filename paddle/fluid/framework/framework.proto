@@ -158,6 +158,8 @@ message VarType {
     SPARSE_COO = 30;
     // the data type of phi::SparseCsrTensor
     SPARSE_CSR = 31;
+    // the data type of phi::DistTensor
+    DIST_TENSOR = 32;
   }
 
   required Type type = 1;
@@ -192,6 +194,7 @@ message VarType {
   optional TensorDesc vocab = 10;
   optional TensorDesc sparse_coo = 11;
   optional TensorDesc sparse_csr = 12;
+  optional TensorDesc dist_tensor = 13;
 }
 
 message VarDesc {

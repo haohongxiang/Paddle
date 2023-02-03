@@ -211,6 +211,9 @@ class EagerVariable final {
       if (tensor.is_dense_tensor()) {
         ConstructVariableFromTensor<phi::DenseTensor>(tensor);
         src_tensor_ = tensor.impl();
+      } else if (tensor.is_dist_tensor()) {
+        ConstructVariableFromTensor<phi::DistTensor>(tensor);
+        src_tensor_ = tensor.impl();
       } else if (tensor.is_selected_rows()) {
         ConstructVariableFromTensor<phi::SelectedRows>(tensor);
       } else if (IsVariableCompatTensor(tensor) &&
