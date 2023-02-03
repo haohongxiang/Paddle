@@ -60,6 +60,9 @@ Tensor add_n_impl(const std::vector<Tensor>& x) {
     if (phi::DenseTensor::classof(input.impl().get())) {
       is_sr_kernel = false;
       break;
+    } else if (phi::DistTensor::classof(input.impl().get())) {
+      is_sr_kernel = false;
+      break;
     }
   }
 
@@ -102,7 +105,8 @@ Tensor add_n_impl(const std::vector<Tensor>& x) {
     std::vector<std::shared_ptr<phi::DenseTensor>> temp_dense_tensots;
     temp_dense_tensots.reserve(x.size());
     for (size_t i = 0; i < input_x.size(); ++i) {
-      if (phi::DenseTensor::classof(x[i].impl().get())) {
+      if (phi::DenseTensor::classof(x[i].impl().get()) ||
+          phi::DistTensor::classof(x[i].impl().get())) {
         temp_dense_tensots.push_back(PrepareData(x[i], kernel.InputAt(0), {}));
         input_x[i] = temp_dense_tensots.back().get();
       } else {
@@ -114,7 +118,15 @@ Tensor add_n_impl(const std::vector<Tensor>& x) {
     for (size_t i = 0; i < x_meta_vec.size(); ++i) {
       x_metas[i] = &x_meta_vec[i];
     }
-    auto kernel_out = SetKernelOutput(&api_output);
+
+    phi::DenseTensor* kernel_out = nullptr;
+
+    if (phi::DenseTensor::classof(x[0].impl().get())) {
+      kernel_out = SetKernelOutput(&api_output);
+    } else if (phi::DistTensor::classof(x[0].impl().get())) {
+      kernel_out = SetDistKernelOutput(&api_output);
+    }
+
     phi::MetaTensor meta_out(kernel_out);
     phi::AddNInferMeta(x_metas, &meta_out);
 

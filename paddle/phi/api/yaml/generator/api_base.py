@@ -1240,11 +1240,11 @@ PADDLE_API {self.get_return_type(inplace_flag=True)} {api_func_name}({self.get_d
             if in_type == "dense":
                 if self.inputs['names'][i] in self.optional_vars:
                     condition_list.append(
-                        f"(!{self.inputs['names'][i]} || {self.inputs['names'][i]}->is_dense_tensor())"
+                        f"(!{self.inputs['names'][i]} || {self.inputs['names'][i]}->is_dist_tensor())"
                     )
                 else:
                     condition_list.append(
-                        f"{self.inputs['names'][i]}.is_dense_tensor()"
+                        f"{self.inputs['names'][i]}.is_dist_tensor()"
                     )
             else:
                 if self.inputs['names'][i] in self.optional_vars:

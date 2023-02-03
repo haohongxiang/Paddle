@@ -80,6 +80,11 @@ static void CopyOrAddTensor(paddle::experimental::Tensor* tensor,
                 t_values, &tensor_values);
           }
         }
+      } else if (LIKELY(t.is_dist_tensor())) {
+        if (tensor->is_dist_tensor()) {
+          // TODO: support gradient accumulation in DTensor mode.
+        }
+
       } else {
         // TODO(jiabin): Support Other TensorBase later
         // TODO(zhanlve): Replace SelectedRowsAddTensor with
