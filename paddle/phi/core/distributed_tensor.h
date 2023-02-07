@@ -28,7 +28,7 @@ class DistTensor : public TensorBase,
  public:
   DistTensor() { value_.reset(new DenseTensor()); }
 
-  DistTensor(const DTensorMeta& dist_meta);
+  explicit DistTensor(const DTensorMeta& dist_meta);
 
   DistTensor(DistTensor&& other) = default;
 
@@ -66,6 +66,10 @@ class DistTensor : public TensorBase,
   bool valid() const noexcept { return value_->valid(); }
 
   bool initialized() const { return value_->initialized(); }
+
+  bool IsInitialized() const { return value_->initialized(); }
+
+  void Resize(const DDim& dims) { value_->Resize(dims); }
 
  private:
   friend class DenseTensorUtils;
