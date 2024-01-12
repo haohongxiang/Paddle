@@ -263,7 +263,13 @@ class Engine:
     def _prepare_data_spec_from_dataloader(self, dataloader):
         inputs_spec = []
         labels_spec = []
-        inputs, labels = next(iter(dataloader))
+
+        data = next(iter(dataloader))
+        if isinstance(data, dict):
+            inputs, labels = tuple(data.values())
+        else:
+            inputs, labels = data
+
         inputs = auto_utils.to_list(inputs)
         labels = auto_utils.to_list(labels)
 

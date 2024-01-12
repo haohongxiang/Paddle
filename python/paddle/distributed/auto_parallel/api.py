@@ -1053,16 +1053,25 @@ class DistModel:
         if optimizer is not None and loss is not None:
             # get the static graph in train mode
             self._engine.prepare(
-                inputs_spec, labels_spec, mode="train", init_parameters=False
+                copy.deepcopy(inputs_spec),
+                copy.deepcopy(labels_spec),
+                mode="train",
+                init_parameters=False,
             )
         if loss is not None:
             # get the static graph in eval mode
             self._engine.prepare(
-                inputs_spec, labels_spec, mode="eval", init_parameters=False
+                copy.deepcopy(inputs_spec),
+                copy.deepcopy(labels_spec),
+                mode="eval",
+                init_parameters=False,
             )
         # get the static graph in predict mode
         self._engine.prepare(
-            inputs_spec, None, mode="predict", init_parameters=False
+            copy.deepcopy(inputs_spec),
+            None,
+            mode="predict",
+            init_parameters=False,
         )
 
         # set the default mode
@@ -1220,11 +1229,11 @@ class DistModel:
             return None
         inner_strategy = auto_strategy.Strategy()
         inner_strategy.fused_passes.enable = strategy.fused_passes.enable
-        if strategy.fused_passes.gemm_epilogue is True:
+        if getattr(strategy.fused_passes, "gemm_epilogue", False):
             inner_strategy.fused_passes.fused_passes_list.append(
                 "fused_gemm_epilogue_pass"
             )
-        if strategy.fused_passes.dropout_add is True:
+        if getattr(strategy.fused_passes, "dropout_add", False):
             inner_strategy.fused_passes.fused_passes_list.append(
                 "fused_dropout_add_pass"
             )
@@ -1630,7 +1639,9 @@ class ShardDataloader:
                 rank=dp_rank,
             )
             self._dataloader = paddle.io.DataLoader(
-                dataset=dataloader.dataset, batch_sampler=self.batch_sampler
+                dataset=dataloader.dataset,
+                batch_sampler=self.batch_sampler,
+                collate_fn=dataloader.collate_fn,
             )
 
     def process_shard_dims(self, shard_dims):
@@ -1683,7 +1694,7 @@ class ShardDataloader:
             if self._all_inputs_in_one_mesh is False:
                 assert len(self._input_keys) == len(self._meshes)
             dist_batch_data = {}
-            for ind in len(self._input_keys):
+            for ind in range(len(self._input_keys)):
                 key = self._input_keys[ind]
                 shard_dim = (
                     self._shard_dims[0]
