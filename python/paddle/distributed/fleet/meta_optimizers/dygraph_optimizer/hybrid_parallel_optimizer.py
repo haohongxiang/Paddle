@@ -466,7 +466,7 @@ class HybridParallelOptimizer:
                 self._inner_opt,
                 (DygraphShardingOptimizer, DygraphShardingOptimizerV2),
             )
-            self._inner_opt.reduce_gradients(parameter_list, self._hcg)
+            # self._inner_opt.reduce_gradients(parameter_list, self._hcg)
             # dp later do not need to use global parameter list
             if not g_shard_norm_align_dp:
                 dp_parameter_list = self._inner_opt.filter_parameters(
